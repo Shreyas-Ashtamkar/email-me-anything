@@ -6,6 +6,7 @@ authors = [
     {name = "Shreyas Ashtamkar",email = "51398602+Shreyas-Ashtamkar@users.noreply.github.com"}
 ]
 readme = "README.md"
+homepage = "https://github.com/Shreyas-Ashtamkar/email-me-anything"
 requires-python = ">=3.12,<4.0"
 dependencies = [
     "python-dotenv (>=1.2.1,<2.0.0)",
