@@ -1,6 +1,6 @@
 
 """
-Entry point for the generalized email-me-anything project.
+Entry point for the generalized email-me-anything project. (only if you clone this repo and run this file directly)
 """
 from src.email_me_anything import send_lucky_email
 
