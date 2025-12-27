@@ -1,0 +1,20 @@
+[project]
+name = "email_me_anything"
+version = "0.1.0"
+description = "Send emails programmatically with a simple Python interface"
+authors = [
+    {name = "Shreyas Ashtamkar",email = "51398602+Shreyas-Ashtamkar@users.noreply.github.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12,<4.0"
+dependencies = [
+    "python-dotenv (>=1.2.1,<2.0.0)",
+    "mailersend (>=2.0.0,<3.0.0)"
+]
+
+[tool.poetry]
+packages = [{include = "email_me_anything", from = "src"}]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
