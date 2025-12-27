@@ -11,12 +11,12 @@ dependencies = [
     "python-dotenv (>=1.2.1,<2.0.0)",
     "mailersend (>=2.0.0,<3.0.0)"
 ]
-license = "MIT"
+license = "Apache-2.0"
 keywords = ["email", "automation", "mail", "python", "api"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Intended Audience :: Developers",
     "Topic :: Communications :: Email"
