@@ -25,7 +25,25 @@ def send_lucky_email(
     subject: str = None,
     output_html_path: Path = Path("debug-email.html")
 ) -> bool:
-    
+    """Select a random CSV row, render it into an HTML template, and send or write the email.
+
+    Args:
+        csv_path (Path): Path to the CSV file to select the data row from.
+        template_path (Path): Path to an HTML template file used to render the email body.
+        sender_address (str): Sender email address (defaults to env value).
+        sender_name (str): Sender display name (defaults to env value).
+        recipients (list): List of recipient dicts with keys 'email' and 'name'.
+        variable_map (dict, optional): Optional mapping of template variable names to CSV columns.
+        subject (str, optional): Email subject. If omitted, a default subject is used.
+        output_html_path (Path): When not in production mode, writes a debug HTML to this path.
+
+    Returns:
+        bool: True when the operation completes (email sent or debug file written),
+              False when no row could be selected from the CSV.
+
+    Raises:
+        Exception: May raise exceptions from `select_random_row`, `build_html_content`, or `send_email`.
+    """
     selected_data = select_random_row(csv_path)
     if not selected_data:
         print("No row selected.")

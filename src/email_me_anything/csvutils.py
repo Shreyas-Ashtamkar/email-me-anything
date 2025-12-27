@@ -67,13 +67,12 @@ def select_random_row(csv_path: Path, skip_header: bool=True) -> Dict[str, Any] 
         skip_header (bool, optional): Whether to skip the first row as a header. 
                                       Defaults to True.
     Returns:
-        Dict[str, Any] | None: A dictionary representing the randomly selected row, 
-                               where keys are column headers (if skip_header is True) 
-                               and values are the corresponding cell values. 
-                               Returns None if the CSV is empty or contains only a header row.
-                               Returns False if no data is found in the CSV.
+        Dict[str, Any] | None | bool: A dictionary representing the randomly selected row on success.
+            Returns False if the CSV could not be read (for example, file access error).
+            Returns None if the CSV exists but contains no data rows (only a header or empty).
+
     Raises:
-        None explicitly, but may raise exceptions from read_csv() or convert_row_to_dict().
+        None explicitly, but may raise exceptions from `read_csv()` or `convert_row_to_dict()`.
     Example:
         >>> row = select_random_row(Path("data.csv"))
         >>> print(row)
