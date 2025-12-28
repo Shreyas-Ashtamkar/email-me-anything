@@ -4,13 +4,7 @@ Generalized orchestration logic for sending any row of data via email using a te
 """
 from pathlib import Path
 
-from .config import (
-        PROD_MODE, 
-        EMAIL_RECIPIENT_0_ADDRESS, 
-        EMAIL_RECIPIENT_0_NAME, 
-        EMAIL_SENDER, 
-        EMAIL_SENDER_ADDRESS
-    )
+from .config import Config
 
 from .csvutils import select_random_row
 from .emailutils import build_html_content, send_email
@@ -18,9 +12,9 @@ from .emailutils import build_html_content, send_email
 def send_lucky_email(
     csv_path: Path,
     template_path: Path,
-    sender_address: str = EMAIL_SENDER_ADDRESS,
-    sender_name: str = EMAIL_SENDER,
-    recipients: list = [{"email": EMAIL_RECIPIENT_0_ADDRESS, "name": EMAIL_RECIPIENT_0_NAME}],
+    sender_address: str = Config.EMAIL_SENDER_ADDRESS,
+    sender_name: str = Config.EMAIL_SENDER,
+    recipients: list = [{"email": Config.EMAIL_RECIPIENT_0_ADDRESS, "name": Config.EMAIL_RECIPIENT_0_NAME}],
     variable_map: dict=None,
     subject: str = None,
     output_html_path: Path = Path("debug-email.html")
@@ -57,7 +51,7 @@ def send_lucky_email(
     sender = {"email": sender_address, "name": sender_name}
     recipients = recipients
     
-    if PROD_MODE:
+    if Config.PROD_MODE:
         response = send_email(
             sender,
             recipients,

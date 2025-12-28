@@ -153,6 +153,31 @@ for row in rows[1:]:
     send_email(sender, [recipient], f"Welcome {data['name']}", html)
 ```
 
+## Testing
+
+The package includes comprehensive test coverage using pytest. Tests verify:
+
+- **Configuration Management**: Parsing of environment variables with proper defaults
+- **CSV Operations**: Reading CSV files, handling missing/malformed data, random row selection with deterministic and probabilistic tests
+- **Email Building**: HTML template rendering, variable mapping, Unicode support, error handling
+- **Email Sending**: Integration with MailerSend API, recipient handling, production vs. debug modes
+- **Complete Workflows**: End-to-end email sending through `send_lucky_email` with variable maps and default values
+
+### Running Tests
+
+Install development dependencies and run pytest:
+
+```bash
+pip install pytest
+pytest tests/ -v
+```
+
+Current test suite includes 42 tests covering:
+- 8 configuration tests (env variable parsing, defaults)
+- 13 CSV utility tests (reading, parsing, randomization)
+- 11 email utility tests (context building, HTML rendering, sending)
+- 10 integration tests (complete workflows, mode switching)
+
 ## License
 
 Apache License 2.0
