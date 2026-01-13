@@ -16,8 +16,7 @@ def send_lucky_email(
     sender_name: str = Config.EMAIL_SENDER,
     recipients: list = [{"email": Config.EMAIL_RECIPIENT_0_ADDRESS, "name": Config.EMAIL_RECIPIENT_0_NAME}],
     variable_map: dict=None,
-    subject: str = None,
-    output_html_path: Path = Path("debug-email.html")
+    subject: str = None
 ) -> bool:
     """Select a random CSV row, render it into an HTML template, and send or write the email.
 
@@ -50,17 +49,12 @@ def send_lucky_email(
         
     sender = {"email": sender_address, "name": sender_name}
     recipients = recipients
+    response = send_email(
+        sender,
+        recipients,
+        subject,
+        html_content
+    )
+    print(f"Email sent: {response}")
     
-    if Config.PROD_MODE:
-        response = send_email(
-            sender,
-            recipients,
-            subject,
-            html_content
-        )
-        print(f"Email sent: {response}")
-    else:
-        print("Production mode is OFF. Writing email to debug-email.html")
-        with open(output_html_path, "w", encoding="utf-8") as debug_file:
-            debug_file.write(html_content)
     return True

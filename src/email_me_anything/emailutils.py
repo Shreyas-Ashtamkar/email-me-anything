@@ -90,16 +90,22 @@ def send_email(sender: Dict[str, str], recipients: List[Dict[str, str]], subject
     """
     
     if Config.PROD_MODE:
-        ms = MailerSendClient()
-        email = (
-            EmailBuilder()
-            .from_email(sender["email"], sender["name"])
-            .to_many(recipients)
-            .subject(subject)
-            .html(html_content)
-            .build()
-        )
-        response = ms.emails.send(email)
+        if Config.MAILER=="mailersend":
+            ms = MailerSendClient()
+            email = (
+                EmailBuilder()
+                .from_email(sender["email"], sender["name"])
+                .to_many(recipients)
+                .subject(subject)
+                .html(html_content)
+                .build()
+            )
+            response = ms.emails.send(email).to_dict()
+        else:
+            print("Some error happened need to debug. See emailutils.py:94")
     else:
         response = {"status": "debug", "message": "Email not sent in non-production mode."}
-    return response.to_dict()
+        print("Production mode is OFF. Writing email to debug-email.html")
+        with open("debug-email.html", "w", encoding="utf-8") as debug_file:
+            debug_file.write(html_content)
+    return response
