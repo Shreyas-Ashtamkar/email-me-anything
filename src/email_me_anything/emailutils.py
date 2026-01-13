@@ -119,19 +119,16 @@ def send_email(sender: Dict[str, str], recipients: List[Dict[str, str]], subject
             msg.add_alternative(html_content, subtype="html")
             
             ctx = ssl.create_default_context()
+            response = None
             with smtplib.SMTP_SSL(SMTPSettings.HOST, SMTPSettings.PORT, context=ctx,timeout=30) as server:
-                try:
-                    server.ehlo()
-                except Exception as e:
-                    print(e)
+                server.ehlo() # If failed here HOST or PORT Wrong                 
+                server.login(SMTPSettings.USER, SMTPSettings.PASS) # If failed here USER or PASS wrong
+                response = server.send_message(msg) # If failed here issue sending mail (check sender/reciever email address or content or attachment)
+            if response:
+                response = dict(response)
+            else:
+                response = {"status": "success", "message":"email sent successfully"}
                 
-                try:    
-                    server.login(SMTPSettings.USER, SMTPSettings.PASS)
-                    response = server.send_message(msg)
-                except Exception as e:
-                    print("Username or password incorrect")
-                    
-                response = dict(response) or {"status": "success", "message":"email sent successfully"}
         else:
             print("Some error happened need to debug. See emailutils.py:94")
     else:
