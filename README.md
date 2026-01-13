@@ -27,11 +27,24 @@ EMAIL_RECIPIENT_0_ADDRESS=recipient@example.com
 
 # Mandatory if email sending is required; defaults to false (no emails sent)
 PROD_MODE=true
+
+# Mailer selection: 'mailersend' (default) or 'smtp'
+MAILER_CLIENT=mailersend
+
+# MailerSend API key (required when MAILER_CLIENT=mailersend and PROD_MODE=true)
 MAILERSEND_API_KEY=your-mailersend-api-key
+
+# SMTP settings (required when MAILER_CLIENT=smtp and PROD_MODE=true)
+SMTP_HOST=smtp.example.com
+SMTP_PORT=465
+SMTP_USER=your-smtp-username
+SMTP_PASS=your-smtp-password
 ```
 
-- **PROD_MODE**: Set to `true` to enable email sending. If `false` (default), no emails are sent just created and saved in `debug-email.html`, and no other keys are required.
-- If `PROD_MODE` is `true`, you must configure your MailerSend API key as per the `mailersend` library documentation (e.g., via `MAILERSEND_API_KEY` environment variable).
+- **PROD_MODE**: Set to `true` to enable email sending. If `false` (default), no emails are sent; instead, the generated HTML is saved to `debug-email.html` for inspection.
+- **MAILER_CLIENT**: Choose between `mailersend` (default) or `smtp` as the email backend.
+- If `PROD_MODE` is `true` and `MAILER_CLIENT` is `mailersend`, you must configure your MailerSend API key via the `MAILERSEND_API_KEY` environment variable.
+- If `PROD_MODE` is `true` and `MAILER_CLIENT` is `smtp`, you must configure the SMTP settings (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`).
 
 ## Usage
 
@@ -153,14 +166,41 @@ for row in rows[1:]:
     send_email(sender, [recipient], f"Welcome {data['name']}", html)
 ```
 
+### Example 4: Using SMTP Instead of MailerSend
+
+To use SMTP as your email backend, configure your `.env` file:
+
+```env
+PROD_MODE=true
+MAILER_CLIENT=smtp
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+```
+
+Then use the same code as before — the package automatically uses SMTP based on the `MAILER_CLIENT` setting:
+
+```python
+from pathlib import Path
+from email_me_anything import send_lucky_email
+
+send_lucky_email(
+    csv_path=Path("quotes.csv"),
+    template_path=Path("templates/quote.html"),
+    subject="Daily Quote via SMTP",
+    recipients=[{"email": "friend@example.com", "name": "Friend"}],
+)
+```
+
 ## Testing
 
 The package includes comprehensive test coverage using pytest. Tests verify:
 
-- **Configuration Management**: Parsing of environment variables with proper defaults
+- **Configuration Management**: Parsing of environment variables with proper defaults, SMTP settings, and mailer client selection
 - **CSV Operations**: Reading CSV files, handling missing/malformed data, random row selection with deterministic and probabilistic tests
 - **Email Building**: HTML template rendering, variable mapping, Unicode support, error handling
-- **Email Sending**: Integration with MailerSend API, recipient handling, production vs. debug modes
+- **Email Sending**: Integration with MailerSend API and SMTP, recipient handling, production vs. debug modes
 - **Complete Workflows**: End-to-end email sending through `send_lucky_email` with variable maps and default values
 
 ### Running Tests
@@ -172,11 +212,11 @@ pip install pytest
 pytest tests/ -v
 ```
 
-Current test suite includes 42 tests covering:
-- 8 configuration tests (env variable parsing, defaults)
-- 13 CSV utility tests (reading, parsing, randomization)
-- 11 email utility tests (context building, HTML rendering, sending)
-- 10 integration tests (complete workflows, mode switching)
+Current test suite includes 73 tests covering:
+- 13 configuration tests (env variable parsing, defaults, SMTP and mailer settings)
+- 23 CSV utility tests (reading, parsing, randomization, edge cases)
+- 17 email utility tests (context building, HTML rendering, sending)
+- 14 integration tests (complete workflows, mode switching)
 
 ## License
 

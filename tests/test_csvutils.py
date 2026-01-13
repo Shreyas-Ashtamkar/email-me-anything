@@ -128,3 +128,75 @@ def test_select_random_row_skip_header_false(tmp_path: Path):
     result = select_random_row(p, skip_header=False)
     # Should be one of the rows, including the header
     assert result["col0"] in ["a", "1", "3"]
+
+
+def test_read_csv_with_quoted_commas(tmp_path: Path):
+    """Test reading CSV with quoted fields containing commas"""
+    p = tmp_path / "data.csv"
+    p.write_text('name,description\nAlice,"She said, ""Hello"""\n', encoding="utf-8")
+    rows = read_csv(p)
+    assert rows == [["name", "description"], ["Alice", 'She said, "Hello"']]
+
+
+def test_read_csv_with_only_whitespace(tmp_path: Path):
+    """Test reading CSV file with only whitespace"""
+    p = tmp_path / "whitespace.csv"
+    p.write_text("   \n  \n", encoding="utf-8")
+    rows = read_csv(p)
+    # CSV reader treats whitespace as valid data
+    assert len(rows) > 0
+
+
+def test_convert_row_to_dict_more_values_than_headers():
+    """Test converting row with more values than headers"""
+    row = ["Alice", "42", "NYC", "extra1", "extra2"]
+    headers = ["name", "age", "city"]
+    result = convert_row_to_dict(row, headers)
+    # Extra values should be ignored
+    assert result == {"name": "Alice", "age": "42", "city": "NYC"}
+
+
+def test_convert_row_to_dict_with_special_characters():
+    """Test converting row with special characters in values"""
+    row = ["Alice<script>", "42; DROP TABLE", "NYC\nLA"]
+    headers = ["name", "age", "city"]
+    result = convert_row_to_dict(row, headers)
+    assert result == {"name": "Alice<script>", "age": "42; DROP TABLE", "city": "NYC\nLA"}
+
+
+def test_select_random_row_empty_csv(tmp_path: Path):
+    """Test select_random_row with completely empty CSV"""
+    p = tmp_path / "empty.csv"
+    p.write_text("", encoding="utf-8")
+    result = select_random_row(p)
+    # Empty file means CSV cannot be read
+    assert result is False
+
+
+def test_select_random_row_with_inconsistent_columns(tmp_path: Path):
+    """Test select_random_row with rows having different column counts"""
+    p = tmp_path / "inconsistent.csv"
+    p.write_text("a,b,c\n1,2\n3,4,5,6\n", encoding="utf-8")
+    result = select_random_row(p)
+    # Should still work, filling missing values with empty strings
+    assert "a" in result
+    assert "b" in result
+    assert "c" in result
+
+
+def test_read_csv_with_newlines_in_quoted_fields(tmp_path: Path):
+    """Test reading CSV with newlines inside quoted fields"""
+    p = tmp_path / "multiline.csv"
+    p.write_text('name,description\n"Alice","Line 1\nLine 2"\n', encoding="utf-8")
+    rows = read_csv(p)
+    assert rows == [["name", "description"], ["Alice", "Line 1\nLine 2"]]
+
+
+def test_convert_row_to_dict_with_numeric_strings():
+    """Test that numeric values remain as strings"""
+    row = ["123", "45.67", "0", "-100"]
+    headers = ["int", "float", "zero", "negative"]
+    result = convert_row_to_dict(row, headers)
+    # All values should be strings
+    assert all(isinstance(v, str) for v in result.values())
+    assert result == {"int": "123", "float": "45.67", "zero": "0", "negative": "-100"}

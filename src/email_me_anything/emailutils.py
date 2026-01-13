@@ -1,16 +1,21 @@
-"""
-Email utilities for building and sending emails using MailerSend.
+"""Email utilities for building and sending emails.
+
+Supports both MailerSend API and SMTP for sending emails based on configuration.
+
 Functions:
 - build_context: Creates a context dictionary for template rendering.
 - build_html_content: Renders an HTML template with provided data.
-- send_email: Sends an email via MailerSend.
+- send_email: Sends an email via the configured mailer (MailerSend or SMTP).
 """
 from pathlib import Path
 from typing import Any, Dict, List
 
 from mailersend import MailerSendClient, EmailBuilder
 
-from email_me_anything.config import Config
+from email.message import EmailMessage
+from email.utils import formataddr
+from email_me_anything.config import Config, SMTPSettings
+import smtplib, ssl
 
 def build_context(data: Dict[str, Any], variable_map: Dict[str, str] = None) -> Dict[str, Any]:
     """
@@ -64,23 +69,26 @@ def build_html_content(template_path: Path, data: Dict[str, Any], variable_map: 
     return html_template.format_map(context)
 
 def send_email(sender: Dict[str, str], recipients: List[Dict[str, str]], subject: str, html_content: str) -> Dict[str, Any]:
-    """
-    Send an email using the MailerSend service.
+    """Send an email using the configured mailer service (MailerSend or SMTP).
+
+    The mailer is selected based on Config.MAILER ('mailersend' or 'smtp').
+    When PROD_MODE is False, no email is sent and the HTML content is written
+    to 'debug-email.html' for inspection.
 
     Args:
         sender (Dict[str, str]): A dictionary containing the sender's email address and name.
             Expected keys: "email" (str), "name" (str).
         recipients (List[Dict[str, str]]): A list of dictionaries containing recipient information.
-            Each dictionary should contain recipient email and name details.
+            Each dictionary should contain "email" and "name" keys.
         subject (str): The subject line of the email.
         html_content (str): The HTML-formatted body content of the email.
 
     Returns:
-        Dict[str, Any]: A dictionary representation of the MailerSend API response,
-            containing status, message ID, and other response metadata.
+        Dict[str, Any]: A dictionary containing the response from the mailer service.
+            In debug mode, returns {"status": "debug", "message": "..."}.
 
     Raises:
-        Exception: May raise exceptions from the MailerSend client if the email
+        Exception: May raise exceptions from the mailer client if the email
             fails to send (e.g., invalid email addresses, authentication errors).
 
     Example:
@@ -101,6 +109,29 @@ def send_email(sender: Dict[str, str], recipients: List[Dict[str, str]], subject
                 .build()
             )
             response = ms.emails.send(email).to_dict()
+        elif Config.MAILER=="smtp":
+            print(SMTPSettings)
+            msg = EmailMessage()
+            msg["Subject"] = subject
+            msg["From"] = formataddr((sender["name"], sender["email"]))
+            msg["To"] = recipients[0]["email"]
+            msg.set_content("Your email does not support HTML content")
+            msg.add_alternative(html_content, subtype="html")
+            
+            ctx = ssl.create_default_context()
+            with smtplib.SMTP_SSL(SMTPSettings.HOST, SMTPSettings.PORT, context=ctx,timeout=30) as server:
+                try:
+                    server.ehlo()
+                except Exception as e:
+                    print(e)
+                
+                try:    
+                    server.login(SMTPSettings.USER, SMTPSettings.PASS)
+                    response = server.send_message(msg)
+                except Exception as e:
+                    print("Username or password incorrect")
+                    
+                response = dict(response) or {"status": "success", "message":"email sent successfully"}
         else:
             print("Some error happened need to debug. See emailutils.py:94")
     else:

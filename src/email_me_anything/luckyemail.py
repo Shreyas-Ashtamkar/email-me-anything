@@ -27,12 +27,11 @@ def send_lucky_email(
         sender_name (str): Sender display name (defaults to env value).
         recipients (list): List of recipient dicts with keys 'email' and 'name'.
         variable_map (dict, optional): Optional mapping of template variable names to CSV columns.
-        subject (str, optional): Email subject. If omitted, a default subject is used.
-        output_html_path (Path): When not in production mode, writes a debug HTML to this path.
+        subject (str, optional): Email subject. If omitted, defaults to "New Data Row!".
 
     Returns:
         bool: True when the operation completes (email sent or debug file written),
-              False when no row could be selected from the CSV.
+              False when no row could be selected from the CSV (empty or read error).
 
     Raises:
         Exception: May raise exceptions from `select_random_row`, `build_html_content`, or `send_email`.

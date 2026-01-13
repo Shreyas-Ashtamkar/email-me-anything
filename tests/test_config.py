@@ -71,3 +71,60 @@ def test_config_unset_env_vars_default_to_none(monkeypatch):
     # Empty strings from env should still be treated as values
     # The getenv returns None only when the var doesn't exist
     assert cfg.Config.PROD_MODE is False  # Empty string != "true"
+
+
+def test_prod_mode_case_insensitive_true(monkeypatch):
+    """Test PROD_MODE with different capitalizations of 'true'"""
+    for value in ["TRUE", "True", "TrUe"]:
+        monkeypatch.setenv("PROD_MODE", value)
+        cfg = importlib.import_module("email_me_anything.config")
+        importlib.reload(cfg)
+        assert cfg.Config.PROD_MODE is True
+
+
+def test_mailer_client_env_parsing(monkeypatch):
+    """Test MAILER_CLIENT environment variable"""
+    monkeypatch.setenv("MAILER_CLIENT", "smtp")
+    cfg = importlib.import_module("email_me_anything.config")
+    importlib.reload(cfg)
+    assert cfg.Config.MAILER == "smtp"
+
+
+def test_mailer_client_default_value(monkeypatch):
+    """Test MAILER_CLIENT can be set"""
+    monkeypatch.setenv("MAILER_CLIENT", "mailersend")
+    cfg = importlib.import_module("email_me_anything.config")
+    importlib.reload(cfg)
+    assert cfg.Config.MAILER == "mailersend"
+
+
+def test_smtp_settings_env_parsing(monkeypatch):
+    """Test SMTP settings environment variables"""
+    monkeypatch.setenv("SMTP_HOST", "smtp.example.com")
+    monkeypatch.setenv("SMTP_PORT", "587")
+    monkeypatch.setenv("SMTP_USER", "user@example.com")
+    monkeypatch.setenv("SMTP_PASS", "password123")
+    
+    cfg = importlib.import_module("email_me_anything.config")
+    importlib.reload(cfg)
+    
+    assert cfg.SMTPSettings.HOST == "smtp.example.com"
+    assert cfg.SMTPSettings.PORT == "587"
+    assert cfg.SMTPSettings.USER == "user@example.com"
+    assert cfg.SMTPSettings.PASS == "password123"
+
+
+def test_smtp_settings_can_be_set(monkeypatch):
+    """Test that SMTP settings can be configured"""
+    monkeypatch.setenv("SMTP_HOST", "test.smtp.com")
+    monkeypatch.setenv("SMTP_PORT", "465")
+    monkeypatch.setenv("SMTP_USER", "test@example.com")
+    monkeypatch.setenv("SMTP_PASS", "testpass")
+    
+    cfg = importlib.import_module("email_me_anything.config")
+    importlib.reload(cfg)
+    
+    assert cfg.SMTPSettings.HOST == "test.smtp.com"
+    assert cfg.SMTPSettings.PORT == "465"
+    assert cfg.SMTPSettings.USER == "test@example.com"
+    assert cfg.SMTPSettings.PASS == "testpass"
