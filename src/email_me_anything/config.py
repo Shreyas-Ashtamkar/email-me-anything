@@ -12,3 +12,4 @@ class Config:
     EMAIL_RECIPIENT_0_NAME = getenv("EMAIL_RECIPIENT_0_NAME")
     EMAIL_RECIPIENT_0_ADDRESS = getenv("EMAIL_RECIPIENT_0_ADDRESS")
     PROD_MODE = getenv("PROD_MODE", "false").lower() == "true"
+    MAILER = getenv("MAILER_CLIENT", "mailersend")
