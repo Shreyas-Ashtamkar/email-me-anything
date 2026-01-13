@@ -10,6 +10,8 @@ from typing import Any, Dict, List
 
 from mailersend import MailerSendClient, EmailBuilder
 
+from email_me_anything.config import Config
+
 def build_context(data: Dict[str, Any], variable_map: Dict[str, str] = None) -> Dict[str, Any]:
     """
     Build a context dictionary by mapping data keys to template variables.
@@ -87,14 +89,17 @@ def send_email(sender: Dict[str, str], recipients: List[Dict[str, str]], subject
         >>> response = send_email(sender, recipients, "Hello", "<p>Hello World</p>")
     """
     
-    ms = MailerSendClient()
-    email = (
-        EmailBuilder()
-        .from_email(sender["email"], sender["name"])
-        .to_many(recipients)
-        .subject(subject)
-        .html(html_content)
-        .build()
-    )
-    response = ms.emails.send(email)
+    if Config.PROD_MODE:
+        ms = MailerSendClient()
+        email = (
+            EmailBuilder()
+            .from_email(sender["email"], sender["name"])
+            .to_many(recipients)
+            .subject(subject)
+            .html(html_content)
+            .build()
+        )
+        response = ms.emails.send(email)
+    else:
+        response = {"status": "debug", "message": "Email not sent in non-production mode."}
     return response.to_dict()
