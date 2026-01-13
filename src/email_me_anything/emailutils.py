@@ -110,7 +110,6 @@ def send_email(sender: Dict[str, str], recipients: List[Dict[str, str]], subject
             )
             response = ms.emails.send(email).to_dict()
         elif Config.MAILER=="smtp":
-            print(SMTPSettings)
             msg = EmailMessage()
             msg["Subject"] = subject
             msg["From"] = formataddr((sender["name"], sender["email"]))
